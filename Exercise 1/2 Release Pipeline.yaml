@@ -1,0 +1,96 @@
+parameters:
+ - name: AgentPool
+   type: string
+   default: Default
+
+ stages:
+ #DEV ENVIRONMENT
+ - stage: DevDeploy
+   displayName: 'Dev Deployment'
+
+   jobs:
+  - deployment: DeployApps
+    displayName: Deploy Web App - Dev
+    environment: 'Dev'
+    
+    pool:
+      name: ${{parameters.AgentPool}}
+   
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+		
+            #Dev WebApp resource creation
+            - task: AzureResourceMaanagerTemplateDeployment@3
+              displayName: WebApp ARM template Validation
+              inputs:
+                deploymentScope: Subscription
+                azureResourceManagerConnection: #ServiceConnectionName
+                subscriptionId: #Subscription Id
+                location: #Geographical Location
+                templateLocation: 'Linked artifact'
+                cmsFile: #$(Pipeline.Workspcae)/drop/ Path of webapp tempalte
+                cmsParametersFile: #$(Pipeline.Workspcae)/drop/ Path of Dev webapp parameter file
+                deploymentMode: 'Incremental'
+
+ #UAT ENVIRONMENT
+ - stage: UatDeploy
+   displayName: 'Uat Deployment'
+
+   jobs:
+  - deployment: DeployApps
+    displayName: Deploy Web App - Uat
+    environment: 'Uat'
+    
+    pool:
+      name: ${{parameters.AgentPool}}
+   
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+		
+            #Uat WebApp resource creation
+            - task: AzureResourceMaanagerTemplateDeployment@3
+              displayName: WebApp ARM template Validation
+              inputs:
+                deploymentScope: Subscription
+                azureResourceManagerConnection: #ServiceConnectionName
+                subscriptionId: #Subscription Id
+                location: #Geographical Location
+                templateLocation: 'Linked artifact'
+                cmsFile: #$(Pipeline.Workspcae)/drop/ Path of webapp tempalte
+                cmsParametersFile: #$(Pipeline.Workspcae)/drop/ Path of Uat webapp parameter file
+                deploymentMode: 'Incremental'
+
+ #Prod ENVIRONMENT
+ - stage: ProdDeploy
+   displayName: 'Prod Deployment'
+
+   jobs:
+  - deployment: DeployApps
+    displayName: Deploy Web App - Prod
+    environment: 'Prod'
+    
+    pool:
+      name: ${{parameters.AgentPool}}
+   
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+		
+            #Prod WebApp resource creation
+            - task: AzureResourceMaanagerTemplateDeployment@3
+              displayName: WebApp ARM template Validation
+              inputs:
+                deploymentScope: Subscription
+                azureResourceManagerConnection: #ProdServiceConnectionName
+                subscriptionId: #Prod Subscription Id
+                location: #Geographical Location
+                templateLocation: 'Linked artifact'
+                cmsFile: #$(Pipeline.Workspcae)/drop/ Path of webapp tempalte
+                cmsParametersFile: #$(Pipeline.Workspcae)/drop/ Path of Prod webapp parameter file
+                deploymentMode: 'Incremental'
+          

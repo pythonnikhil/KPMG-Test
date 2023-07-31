@@ -1,0 +1,72 @@
+#Build Pipeline to validate ARM template
+parameters:
+- name: AgentPool
+  type: string
+  default: 'window-2019'
+
+stages:
+- stage: Build
+
+  jobs:
+  - job: Build
+
+    pool:
+    vmImage: ${{parameter.AgentPool}}
+
+    
+    steps:
+    #Dev WebApp resource creation
+    - task: AzureResourceMaanagerTemplateDeployment@3
+      displayName: WebApp ARM template Validation
+      inputs:
+        deploymentScope: Subscription
+        azureResourceManagerConnection: #ServiceConnectionName
+        subscriptionId: #Subscription Id
+        location: #Geographical Location
+        templateLocation: 'Linked artifact'
+        cmsFile: #Path of webapp tempalte
+        cmsParametersFile: #Path of Dev webapp parameter file
+        deploymentMode: 'Validaion'
+	
+    #Uat WebApp resource creation
+    - task: AzureResourceMaanagerTemplateDeployment@3
+      displayName: WebApp ARM template Validation
+      inputs:
+        deploymentScope: Subscription
+        azureResourceManagerConnection: #ServiceConnectionName
+        subscriptionId: #Subscription Id
+        location: #Geographical Location
+        templateLocation: 'Linked artifact'
+        cmsFile: #Path of webapp tempalte
+        cmsParametersFile: #Path of UAT webapp parameter file
+        deploymentMode: 'Validaion'
+
+    #Prod WebApp resource creation
+    - task: AzureResourceMaanagerTemplateDeployment@3
+      displayName: WebApp ARM template Validation
+      inputs:
+        deploymentScope: Subscription
+        azureResourceManagerConnection: #Prod ServiceConnectionName
+        subscriptionId: #Prod Subscription Id
+        location: #Geographical Location
+        templateLocation: 'Linked artifact'
+        cmsFile: #Path of webapp tempalte
+        cmsParametersFile: #Path of PROD webapp parameter file
+        deploymentMode: 'Validaion'
+
+    - task: CopyFiles@2
+      inputs: 
+        SourceFolder: #ARM Folder Name while ARM template residing
+        Content: '**/*.*'
+        TargetFolder: $(build.ArtifactStagingDirectory)\ARMTemplate
+
+    - task: PublishBuildArtifacts@1
+      displayName: PublishArtifact
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: $(build.ArtifactStagingDirectory)
+        ArtifactName: $(BuildParameters.ArtifactName)
+        TargetPath: '\\my\share\$(Build.DefinationName)\$(Build.BuildNumber)'
+        
+  
+

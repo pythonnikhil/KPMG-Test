@@ -1,0 +1,15 @@
+# This is the top-level YAML file that will orchestrate the pipeline
+trigger:
+  branches:
+    include:
+    - '*'
+    exclude:
+    - refs/heads/main
+  
+
+pool:
+  name: Default
+
+stages:
+- template: Build Pipeline.yaml
+- template: Release Pipeline.yaml
